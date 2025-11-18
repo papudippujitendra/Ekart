@@ -17,19 +17,26 @@ jobs:
       SONAR_PROJECT_KEY: ekart
 
     steps:
-      # Checkout the repository
+      # 1️⃣ Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Set up JDK 17
+      # 2️⃣ Set up JDK 17
       - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3️⃣ Set up Maven (with cache)
+      - name: Set up Maven
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
 
-      # SonarQube analysis
+      # 4️⃣ SonarQube Analysis
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -39,28 +46,28 @@ jobs:
             -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      # Build & Deploy to Nexus
+      # 5️⃣ Build & Deploy to Nexus
       - name: Build & Deploy to Nexus
         env:
           NEXUS_USR: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PSW: ${{ secrets.NEXUS_PASSWORD }}
         run: |
-          mvn clean deploy -s .github/maven-settings.xml -DskipTests
+          mvn clean deploy -s .github/maven-settings.xml
 
-      # Build Docker image
+      # 6️⃣ Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t 9492295650/myweb:${{ github.run_number }} .
           docker tag 9492295650/myweb:${{ github.run_number }} 9492295650/myweb:latest
 
-      # Login to Docker Hub
+      # 7️⃣ Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # Push Docker image
+      # 8️⃣ Push Docker Image
       - name: Push Docker Image
         run: |
           docker push 9492295650/myweb:${{ github.run_number }}
