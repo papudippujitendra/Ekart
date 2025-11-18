@@ -14,7 +14,7 @@ jobs:
 
     env:
       SONAR_HOST_URL: http://3.95.38.0:9000
-      SONAR_PROJECT_KEY: ekart
+      SONAR_PROJECT_KEY: Ekart
 
     steps:
       # 1️⃣ Checkout code
